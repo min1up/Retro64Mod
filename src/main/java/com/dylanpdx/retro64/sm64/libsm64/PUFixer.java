@@ -1,7 +1,7 @@
 package com.dylanpdx.retro64.sm64.libsm64;
 
-import com.mojang.math.Vector3f;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 
 public class PUFixer {
 
@@ -10,8 +10,8 @@ public class PUFixer {
      * @param pos Coordinate in MC
      * @return Coordinate in SM64
      */
-    public static Vector3f convertToSM64(Vector3f pos){
-        pos.mul(LibSM64.SCALE_FACTOR);
+    public static Vec3f convertToSM64(Vec3f pos){
+        pos.scale(LibSM64.SCALE_FACTOR);
 
         return pos;
     }
@@ -21,8 +21,8 @@ public class PUFixer {
      * @param pos Coordinate in MC
      * @return Coordinate in SM64
      */
-    public static Vec3 convertToSM64(Vec3 pos){
-        return pos.scale(LibSM64.SCALE_FACTOR);
+    public static Vec3d convertToSM64(Vec3d pos){
+        return pos.multiply(LibSM64.SCALE_FACTOR);
     }
 
     /**
@@ -30,9 +30,9 @@ public class PUFixer {
      * @param pos Coordinate in SM64
      * @return Coordinate in MC
      */
-    public static Vector3f convertToMC(Vector3f pos)
+    public static Vec3f convertToMC(Vec3f pos)
     {
-        pos.mul(1/LibSM64.SCALE_FACTOR);
+        pos.scale(1/LibSM64.SCALE_FACTOR);
         return pos;
     }
 }

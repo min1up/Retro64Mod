@@ -1,11 +1,11 @@
 package com.dylanpdx.retro64.networking;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.Vec3;
-
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.math.Vec3d;
 
 /**
  * Attack packet, used to apply knockback to entities
@@ -15,19 +15,19 @@ public class attackPacket {
     int targetID;
     float angle;
 
-    public static final BiConsumer<attackPacket, FriendlyByteBuf> encoder = new BiConsumer<attackPacket, FriendlyByteBuf>(){
+    public static final BiConsumer<attackPacket, PacketByteBuf> encoder = new BiConsumer<attackPacket, PacketByteBuf>(){
 
         @Override
-        public void accept(attackPacket attackPacket, FriendlyByteBuf friendlyByteBuf) {
+        public void accept(attackPacket attackPacket, PacketByteBuf friendlyByteBuf) {
             friendlyByteBuf.writeInt(attackPacket.targetID);
             friendlyByteBuf.writeFloat(attackPacket.angle);
         }
     };
 
-    public static final Function<FriendlyByteBuf,attackPacket> decoder = new Function<FriendlyByteBuf,attackPacket>(){
+    public static final Function<PacketByteBuf,attackPacket> decoder = new Function<PacketByteBuf,attackPacket>(){
 
         @Override
-        public attackPacket apply(FriendlyByteBuf friendlyByteBuf) {
+        public attackPacket apply(PacketByteBuf friendlyByteBuf) {
             attackPacket attackPacket = new attackPacket(friendlyByteBuf.readInt(), friendlyByteBuf.readFloat());
             return attackPacket;
         }
@@ -39,10 +39,10 @@ public class attackPacket {
     }
 
     public static void applyKnockback(Entity e, float ang){
-        // convert angle, which is in radians to vec3
+        // convert angle, which is in radians to Vec3d
         ang= (float) (Math.toRadians(90)-ang);
-        Vec3 knockback = new Vec3(Math.cos(ang), .7f, Math.sin(ang));
-        e.setDeltaMovement(e.getDeltaMovement().add(new Vec3(knockback.x(),knockback.y(),knockback.z())));
+        Vec3d knockback = new Vec3d(Math.cos(ang), .7f, Math.sin(ang));
+        e.setVelocity(e.getVelocity().add(new Vec3d(knockback.getX(),knockback.getY(),knockback.getZ())));
 
     }
 }

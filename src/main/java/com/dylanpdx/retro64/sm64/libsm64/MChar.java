@@ -3,12 +3,12 @@ package com.dylanpdx.retro64.sm64.libsm64;
 import com.dylanpdx.retro64.Retro64;
 import com.dylanpdx.retro64.SM64EnvManager;
 import com.dylanpdx.retro64.sm64.SM64MCharAction;
-import com.mojang.math.Vector3f;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 
 public class MChar {
 
@@ -62,7 +62,7 @@ public class MChar {
 
     public MChar(){
         SM64EnvManager.updateSurfs(null);
-        id = LibSM64.MCharCreate(new Vector3f(Minecraft.getInstance().player.position()));
+        id = LibSM64.MCharCreate(new Vec3f(MinecraftClient.getInstance().player.getPos()));
         if (id==-1){
             Retro64.LOGGER.info("MChar creation failed");
             return;
@@ -70,9 +70,9 @@ public class MChar {
         state = new SM64MCharState();
         inputs= new SM64MCharInputs();
         outGeometry= new SM64MCharGeometryBuffers();
-        outGeometry.position = allocateVector3Array(Libsm64Library.SM64_GEO_MAX_TRIANGLES*3); // 3 vector3f per triangle
-        outGeometry.normal = allocateVector3Array(Libsm64Library.SM64_GEO_MAX_TRIANGLES*3); // 3 vector3f per triangle
-        outGeometry.color = allocateVector3Array(Libsm64Library.SM64_GEO_MAX_TRIANGLES*3); // 3 vector3f per triangle
+        outGeometry.position = allocateVector3Array(Libsm64Library.SM64_GEO_MAX_TRIANGLES*3); // 3 Vec3f per triangle
+        outGeometry.normal = allocateVector3Array(Libsm64Library.SM64_GEO_MAX_TRIANGLES*3); // 3 Vec3f per triangle
+        outGeometry.color = allocateVector3Array(Libsm64Library.SM64_GEO_MAX_TRIANGLES*3); // 3 Vec3f per triangle
         outGeometry.uv = allocateVector2Array(Libsm64Library.SM64_GEO_MAX_TRIANGLES*3); // 3 vector2f per triangle
         rotPointer=new Memory(3*2); // 3 shorts, 2 bytes per short
 
@@ -88,7 +88,7 @@ public class MChar {
 
         LibSM64.MCharTick(id,inputs,state,outGeometry);
         if (y()<-70)
-            damage(8,Vec3.ZERO);
+            damage(8,Vec3d.ZERO);
         geomPos=outGeometry.position.getFloatArray(0,outGeometry.numTrianglesUsed*9);
         geomNorms=outGeometry.normal.getFloatArray(0,outGeometry.numTrianglesUsed*9);
         geomColors=outGeometry.color.getFloatArray(0,outGeometry.numTrianglesUsed*9);
@@ -101,7 +101,7 @@ public class MChar {
         animYRot=rotPointer.getShort(2);
         animZRot=rotPointer.getShort(4);
         if ((state.health==255 || state.action== SM64MCharAction.ACT_QUICKSAND_DEATH.id) && deathTime==0){
-            deathTime= Util.getEpochMillis();
+            deathTime= Util.getEpochTimeMs();
         }
     }
 
@@ -149,12 +149,12 @@ public class MChar {
         return state.position[2]/LibSM64.SCALE_FACTOR;
     }
 
-    public void teleport(Vec3 pos){
+    public void teleport(Vec3d pos){
         LibSM64.MCharTeleport(id,pos);
     }
 
-    public void damage(int amount,Vec3 pos){
-        Libsm64Library.INSTANCE.sm64_mChar_apply_damage(id,amount,0,(float)pos.x(),(float)pos.y(),(float)pos.z());
+    public void damage(int amount,Vec3d pos){
+        Libsm64Library.INSTANCE.sm64_mChar_apply_damage(id,amount,0,(float)pos.getX(),(float)pos.getY(),(float)pos.getZ());
     }
 
     static Pointer allocateVector3Array(int size){
@@ -171,19 +171,19 @@ public class MChar {
         return m;
     }
 
-    public Vector3f velocity(){
-        Vector3f v = new Vector3f(state.velocity[0],state.velocity[1],state.velocity[2]);
+    public Vec3f velocity(){
+        Vec3f v = new Vec3f(state.velocity[0],state.velocity[1],state.velocity[2]);
         return PUFixer.convertToMC(v);
     }
 
-    public void setVelocity(Vector3f v){
+    public void setVelocity(Vec3f v){
         var converted=PUFixer.convertToSM64(v);
-        Libsm64Library.INSTANCE.sm64_mChar_set_velocity(id,converted.x(),converted.y(),converted.z());
+        Libsm64Library.INSTANCE.sm64_mChar_set_velocity(id,converted.getX(),converted.getY(),converted.getZ());
     }
 
     public float velocityMagnitude(){
         var velocity = velocity();
-        return (float) Math.sqrt(velocity.x()*velocity.x()+/*velocity.y()*velocity.y()+*/velocity.z()*velocity.z());
+        return (float) Math.sqrt(velocity.getX()*velocity.getX()+/*velocity.y()*velocity.y()+*/velocity.getZ()*velocity.getZ());
     }
 
     public void heal(byte amount){

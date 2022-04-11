@@ -5,9 +5,9 @@ import com.dylanpdx.retro64.TexGenerator;
 import com.dylanpdx.retro64.Utils;
 import com.dylanpdx.retro64.sm64.SM64MCharAction;
 import com.dylanpdx.retro64.textureManager;
-import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.math.Vector3f;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
@@ -122,7 +122,7 @@ public class LibSM64 {
         {
             for (int iy = 0; iy < SM64_TEXTURE_HEIGHT; iy++)
             {
-                image.setPixelRGBA(ix,iy, Utils.iFromByteArray(new byte[]{
+                image.setColor(ix,iy, Utils.iFromByteArray(new byte[]{
                         textureData.get(4 * (ix + SM64_TEXTURE_WIDTH * iy) + 3),
                         textureData.get(4 * (ix + SM64_TEXTURE_WIDTH * iy) + 2),
                         textureData.get(4 * (ix + SM64_TEXTURE_WIDTH * iy) + 1),
@@ -153,9 +153,9 @@ public class LibSM64 {
         Libsm64Library.INSTANCE.sm64_static_surfaces_load(surfs, surfaces.length); // may not work due to JNA
     }
 
-    public static int MCharCreate(Vector3f pos){
+    public static int MCharCreate(Vec3f pos){
         pos = PUFixer.convertToSM64(pos);
-        return Libsm64Library.INSTANCE.sm64_mChar_create(pos.x(),pos.y(),pos.z());
+        return Libsm64Library.INSTANCE.sm64_mChar_create(pos.getX(),pos.getY(),pos.getZ());
     }
 
 
@@ -168,8 +168,8 @@ public class LibSM64 {
         Libsm64Library.INSTANCE.sm64_mChar_delete(mCharId);
     }
 
-    public static void MCharTeleport(int mCharId, Vec3 pos){
-        Libsm64Library.INSTANCE.sm64_mChar_teleport(mCharId,(float)pos.x()*SCALE_FACTOR,(float)pos.y()*SCALE_FACTOR,(float)pos.z()*SCALE_FACTOR);
+    public static void MCharTeleport(int mCharId, Vec3d pos){
+        Libsm64Library.INSTANCE.sm64_mChar_teleport(mCharId,(float)pos.getX()*SCALE_FACTOR,(float)pos.getY()*SCALE_FACTOR,(float)pos.getZ()*SCALE_FACTOR);
     }
 
     public static void MCharChangeState(int mCharId, int stateID){

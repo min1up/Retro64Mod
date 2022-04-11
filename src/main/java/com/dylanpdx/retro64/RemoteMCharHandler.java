@@ -5,12 +5,12 @@ import com.dylanpdx.retro64.sm64.libsm64.AnimInfo;
 import com.dylanpdx.retro64.sm64.libsm64.LibSM64;
 import com.dylanpdx.retro64.sm64.libsm64.MChar;
 import com.dylanpdx.retro64.sm64.libsm64.SM64MCharState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
+//import net.minecraft.resources.ResourceKey;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.Hashtable;
 
@@ -19,8 +19,9 @@ import java.util.Hashtable;
  */
 public class RemoteMCharHandler {
 
-    static Hashtable<Player, MChar> mChars = new Hashtable<>();
-    public static ResourceKey<Level> wasMCharDimm=null;
+    static Hashtable<PlayerEntity, MChar> mChars = new Hashtable<>();
+    //TODO: Find an alternative to ResourceKey
+    public static ResourceKey<ClientWorld> wasMCharDimm=null;
 
     static void verifyInitialized(){
         if (mChars==null){
@@ -33,7 +34,7 @@ public class RemoteMCharHandler {
      */
     public static void tickAll(){
         verifyInitialized();
-        for(Player player : mChars.keySet()){
+        for(PlayerEntity player : mChars.keySet()){
             mChars.get(player).animUpdate();
         }
     }
@@ -49,14 +50,14 @@ public class RemoteMCharHandler {
      * @param model Model the player is using
      * @param pos Player position
      */
-    public static void updateMChar(Player player, AnimInfo animInfo, short animXRot, short animYRot, short animZRot, int action, int model, Vec3 pos){
+    public static void updateMChar(PlayerEntity player, AnimInfo animInfo, short animXRot, short animYRot, short animZRot, int action, int model, Vec3d pos){
         verifyInitialized();
         if (!mChars.containsKey(player)){
             SM64EnvManager.updateSurfs(null, SM64EnvManager.generateSafetyFloor(0,0,0));
             mChars.put(player, new MChar());
         }
         mChars.get(player).animInfo =animInfo;
-        mChars.get(player).teleport(player.position());
+        mChars.get(player).teleport(player.getPos());
         mChars.get(player).animXRot = animXRot;
         mChars.get(player).animYRot = animYRot;
         mChars.get(player).animZRot = animZRot;
@@ -71,7 +72,7 @@ public class RemoteMCharHandler {
      * Turn on R64 mode for a player
      * @param player Player to turn on
      */
-    public static void mCharOn(Player player){
+    public static void mCharOn(PlayerEntity player){
         if (player.isSpectator()) // don't turn on R64 for spectators
             return;
         var smCap = Utils.getSmc64Capability(player);
@@ -79,13 +80,13 @@ public class RemoteMCharHandler {
         boolean isMChar =smCap.getIsEnabled();
         if (isMChar) return;
         smCap.setIsEnabled(true);
-        if (player== Minecraft.getInstance().player)
+        if (player== MinecraftClient.getInstance().player)
         {
             // handle for local player
             if (SM64EnvManager.selfMChar==null)
                 SM64EnvManager.selfMChar = new MChar();
             capabilitySyncManager.syncClientToServer(smCap,false);
-            wasMCharDimm=player.getLevel().dimension();
+            wasMCharDimm=player.getWorld().getDimension();
         }
         else
         {
@@ -100,7 +101,7 @@ public class RemoteMCharHandler {
      * Turn off R64 mode for a player
      * @param player Player to turn off
      */
-    public static void mCharOff(Player player){
+    public static void mCharOff(PlayerEntity player){
         mCharOff(player,false);
     }
 
@@ -109,13 +110,13 @@ public class RemoteMCharHandler {
      * @param player Player to turn off
      * @param fatal If true, the player will die; used for when MChar health is 0
      */
-    public static void mCharOff(Player player,boolean fatal){
+    public static void mCharOff(PlayerEntity player,boolean fatal){
         var smCap = Utils.getSmc64Capability(player);
         if (smCap==null) return;
         boolean isMChar =smCap.getIsEnabled();
         if (!isMChar) return;
         smCap.setIsEnabled(false);
-        if (player== Minecraft.getInstance().player)
+        if (player== MinecraftClient.getInstance().player)
         {
             SM64EnvManager.selfMChar.destroy();
             SM64EnvManager.selfMChar = null;
@@ -133,7 +134,7 @@ public class RemoteMCharHandler {
      * Toggle R64 mode for a player
      * @param player Player to toggle
      */
-    public static void toggleMChar(Player player){
+    public static void toggleMChar(PlayerEntity player){
         var smCap = Utils.getSmc64Capability(player);
         if (smCap==null) return;
         boolean isMChar =smCap.getIsEnabled();
@@ -146,7 +147,7 @@ public class RemoteMCharHandler {
      * @param player Player to check
      * @return True if the player is in R64 mode
      */
-    public static boolean getIsMChar(Player player){
+    public static boolean getIsMChar(PlayerEntity player){
         var smCap = Utils.getSmc64Capability(player);
         if (smCap==null) return false;
         return smCap.getIsEnabled();
@@ -157,7 +158,7 @@ public class RemoteMCharHandler {
      * @param player Player to set
      * @param isMChar True if the player should be in R64 mode
      */
-    public static void setIsMChar(Player player, boolean isMChar){
+    public static void setIsMChar(PlayerEntity player, boolean isMChar){
         if (isMChar){
             mCharOn(player);
         }else{
@@ -170,14 +171,14 @@ public class RemoteMCharHandler {
      * @param player Player to toggle
      * @param isMChar True if the player is in R64 mode
      */
-    public static void onMCharToggle(Player player,boolean isMChar){
-        player.refreshDimensions();
-        var pos = player.position();
+    public static void onMCharToggle(PlayerEntity player,boolean isMChar){
+        player.calculateDimensions();
+        var pos = player.getPos();
         for (int i = 0; i < 50; i++) {
-            var rx = (Minecraft.getInstance().level.random.nextFloat()-.5f)/3f;
-            var ry = (Minecraft.getInstance().level.random.nextFloat()-0)/3f;
-            var rz = (Minecraft.getInstance().level.random.nextFloat()-.5f)/3f;
-            Minecraft.getInstance().particleEngine.createParticle(ParticleTypes.FIREWORK,pos.x,pos.y,pos.z,rx,ry,rz);
+            var rx = (MinecraftClient.getInstance().world.random.nextFloat()-.5f)/3f;
+            var ry = (MinecraftClient.getInstance().world.random.nextFloat()-0)/3f;
+            var rz = (MinecraftClient.getInstance().world.random.nextFloat()-.5f)/3f;
+            MinecraftClient.getInstance().particleManager.addParticle(ParticleTypes.FIREWORK,pos.x,pos.y,pos.z,rx,ry,rz);
         }
     }
 
@@ -186,11 +187,11 @@ public class RemoteMCharHandler {
      * @param p Player to get the state for
      * @return The MChar's state
      */
-    public static SM64MCharState getState(Player p){
+    public static SM64MCharState getState(PlayerEntity p){
         verifyInitialized();
         if (mChars.containsKey(p)){
             return mChars.get(p).state;
-        }else if (p==Minecraft.getInstance().player){
+        }else if (p==MinecraftClient.getInstance().player){
             return SM64EnvManager.selfMChar.state;
         }
         return null;
@@ -200,9 +201,9 @@ public class RemoteMCharHandler {
      * returns all players who are mChar
      * @return all players who are mChar
      */
-    public static Player[] getPlayers(){
+    public static PlayerEntity[] getPlayers(){
         verifyInitialized();
-        return mChars.keySet().toArray(new Player[0]);
+        return mChars.keySet().toArray(new PlayerEntity[0]);
     }
 
 }
