@@ -2,9 +2,9 @@ package com.dylanpdx.retro64.networking;
 
 import com.dylanpdx.retro64.capabilities.smc64CapabilityImplementation;
 import com.dylanpdx.retro64.capabilities.smc64CapabilityInterface;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketByteBuf;
 
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -20,42 +20,42 @@ public class capabilityPacket {
     boolean kill;
 
 
-    public Player getPlayer(){
-        return Minecraft.getInstance().level.getPlayerByUUID(pUUID);
+    public PlayerEntity getPlayer(){
+        return MinecraftClient.getInstance().world.getPlayerByUuid(pUUID);
     }
 
-    public void setPlayer(Player player){
-        this.pUUID=player.getUUID();
+    public void setPlayer(PlayerEntity player){
+        this.pUUID=player.getUuid();
     }
 
-    public static final BiConsumer<capabilityPacket, FriendlyByteBuf> encoder = new BiConsumer<capabilityPacket, FriendlyByteBuf>() {
+    public static final BiConsumer<capabilityPacket, PacketByteBuf> encoder = new BiConsumer<capabilityPacket, PacketByteBuf>() {
         @Override
-        public void accept(capabilityPacket capabilityPacket, FriendlyByteBuf friendlyByteBuf) {
+        public void accept(capabilityPacket capabilityPacket, PacketByteBuf friendlyByteBuf) {
             friendlyByteBuf.writeNbt(capabilityPacket.capability.serializeNBT());
             friendlyByteBuf.writeBoolean(capabilityPacket.pUUID!=null);
             if(capabilityPacket.pUUID!=null){
-                friendlyByteBuf.writeUUID(capabilityPacket.pUUID);
+                friendlyByteBuf.writeUuid(capabilityPacket.pUUID);
             }
             friendlyByteBuf.writeBoolean(capabilityPacket.kill);
         }
     };
 
-    public static Function<FriendlyByteBuf, capabilityPacket> decoder = new Function<FriendlyByteBuf, capabilityPacket>() {
+    public static Function<PacketByteBuf, capabilityPacket> decoder = new Function<PacketByteBuf, capabilityPacket>() {
         @Override
-        public capabilityPacket apply(FriendlyByteBuf friendlyByteBuf) {
+        public capabilityPacket apply(PacketByteBuf friendlyByteBuf) {
             var cpacket = new capabilityPacket();
             cpacket.capability = new smc64CapabilityImplementation();
             cpacket.capability.deserializeNBT(friendlyByteBuf.readNbt());
             boolean hasPlayer = friendlyByteBuf.readBoolean();
             if(hasPlayer){
-                cpacket.pUUID = friendlyByteBuf.readUUID();
+                cpacket.pUUID = friendlyByteBuf.readUuid();
             }
             cpacket.kill = friendlyByteBuf.readBoolean();
             return cpacket;
         }
     };
 
-    public capabilityPacket(smc64CapabilityInterface capability, Player p){
+    public capabilityPacket(smc64CapabilityInterface capability, PlayerEntity p){
         this.capability=capability;
         setPlayer(p);
     }
