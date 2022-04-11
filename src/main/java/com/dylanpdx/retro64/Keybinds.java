@@ -1,38 +1,36 @@
 package com.dylanpdx.retro64;
 
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.KeyMapping;
-import net.minecraftforge.client.ClientRegistry;
+import org.lwjgl.glfw.GLFW;
+
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 
 public class Keybinds {
-    private static KeyMapping[] keyBindings;
+    private static KeyBinding keyBindings[];
 
-    public static void register(){
-        // 263-262
-        keyBindings = new KeyMapping[]{
-                new KeyMapping("key."+Retro64.MOD_ID+".actKey", InputConstants.KEY_LALT/*Left Alt*/, "key.categories.retro64"),
-                new KeyMapping("key."+Retro64.MOD_ID+".mToggle", InputConstants.KEY_M/*M*/, "key.categories.retro64"),
-                new KeyMapping("key."+Retro64.MOD_ID+".mMenu", InputConstants.KEY_Z/*Z*/, "key.categories.retro64"),
-                //new KeyMapping("key."+Retro64.MOD_ID+".debugToggle",InputConstants.KEY_RBRACKET/*Right Bracket*/, "key.categories.retro64"),
+    public static void register() {
+        keyBindings = new KeyBinding[] {
+            KeyBindingHelper.registerKeyBinding(new KeyBinding("key."+Retro64.MOD_ID+".actKey", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, "key.category.retro64")),
+            KeyBindingHelper.registerKeyBinding(new KeyBinding("key."+Retro64.MOD_ID+".mToggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M, "key.category.retro64")),
+            KeyBindingHelper.registerKeyBinding(new KeyBinding("key."+Retro64.MOD_ID+".mMenu", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Z, "key.category.retro64")),
+            //KeyBindingHelper.registerKeyBinding(new KeyBinding("key."+Retro64.MOD_ID+".debugToggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_BRACKET, "key.category.retro64"))
         };
-        for (KeyMapping key : keyBindings) {
-            ClientRegistry.registerKeyBinding(key);
-        }
     }
 
-    public static KeyMapping getActKey(){
+    public static KeyBinding getActKey() {
         return keyBindings[0];
     }
 
-    public static KeyMapping getMToggle(){
+    public static KeyBinding getMToggle() {
         return keyBindings[1];
     }
 
-    public static KeyMapping getMMenu(){
+    public static KeyBinding getMMenu() {
         return keyBindings[2];
     }
 
-    /*public static KeyMapping getDebugToggle(){
+    /*public static KeyBinding getDebugToggle() {
         return keyBindings[3];
     }*/
 
