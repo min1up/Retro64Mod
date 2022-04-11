@@ -1,15 +1,13 @@
 package com.dylanpdx.retro64;
 
 import com.dylanpdx.retro64.sm64.libsm64.Libsm64Library;
-import com.mojang.blaze3d.platform.NativeImage;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.texture.NativeImage;
 
 // import java.io.DataInputStream;
 // import java.io.File;
 import java.io.IOException;
 // import java.io.InputStream;
-
-
 
 public class TexGenerator {
 
@@ -29,7 +27,7 @@ public class TexGenerator {
     public static NativeImage appendSteveStuffToTex(NativeImage input){
         // assumes 320x64 input
         try {
-            var steveAtlasIn = Minecraft.getInstance().getResourceManager().getResource(textureManager.steveAtlas).getInputStream();
+            var steveAtlasIn = MinecraftClient.getInstance().getResourceManager().getResource(textureManager.steveAtlas).getInputStream();
             var steveAtlas = NativeImage.read(steveAtlasIn);
             overlayImage(input,steveAtlas,192,0,192,0,128,64);
             return input;
@@ -50,7 +48,7 @@ public class TexGenerator {
         luigiBg.fillRect(0, 0, Libsm64Library.SM64_TEXTURE_WIDTH, Libsm64Library.SM64_TEXTURE_HEIGHT, 0x00000000); // fill entire image with transparent black
         overlayImage(luigiBg, img);
         try {
-            var LAtlasInput = Minecraft.getInstance().getResourceManager().getResource(textureManager.luigiAtlas).getInputStream();
+            var LAtlasInput = MinecraftClient.getInstance().getResourceManager().getResource(textureManager.luigiAtlas).getInputStream();
             var LAtlas = NativeImage.read(LAtlasInput);
             overlayImage(luigiBg, LAtlas);
         } catch (IOException e) {
@@ -68,7 +66,7 @@ public class TexGenerator {
     public static void overlayImage(NativeImage imgA, NativeImage imgB){
         for(int x = 0; x < imgA.getWidth(); x++){
             for(int y = 0; y < imgA.getHeight(); y++){
-                imgA.blendPixel(x, y, imgB.getPixelRGBA(x, y));
+                imgA.blend(x, y, imgB.getColor(x, y));
 
             }
         }
@@ -89,10 +87,9 @@ public class TexGenerator {
     public static void overlayImage(NativeImage imgA, NativeImage imgB, int aX, int aY, int bX, int bY, int width, int height){
         for(int x = 0; x < width; x++){
             for(int y = 0; y < height; y++){
-                imgA.blendPixel(aX + x, aY + y, imgB.getPixelRGBA(bX + x, bY + y));
+                imgA.blend(aX + x, aY + y, imgB.getColor(bX + x, bY + y));
 
             }
         }
     }
 }
-
