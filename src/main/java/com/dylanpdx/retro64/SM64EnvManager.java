@@ -3,11 +3,11 @@ package com.dylanpdx.retro64;
 import com.dylanpdx.retro64.events.clientControllerEvents;
 import com.dylanpdx.retro64.sm64.SM64SurfaceType;
 import com.dylanpdx.retro64.sm64.libsm64.*;
-import com.mojang.math.Vector3f;
-import net.minecraft.client.Minecraft;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -38,7 +38,7 @@ public class SM64EnvManager {
      * Update volume
      */
     public static void updateVol(){
-        var vol = Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.MASTER) * Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.PLAYERS);
+        var vol = MinecraftClient.getInstance().options.getSoundVolume(SoundCategory.MASTER) * MinecraftClient.getInstance().options.getSoundVolume(SoundCategory.PLAYERS);
         if (lastVol!=vol){
             lastVol=vol;
             Libsm64Library.INSTANCE.sm64_set_volume(vol);
@@ -54,11 +54,11 @@ public class SM64EnvManager {
      */
     public static SM64Surface[] generateSafetyFloor(float x, float y, float z){
         return LibSM64SurfUtils.generateQuad(
-                new Vector3f(-10, -0.5f, -10),
-                new Vector3f(-10, -0.5f, 10),
-                new Vector3f(10, -0.5f, 10),
-                new Vector3f(10, -0.5f, -10),
-                new Vector3f(x,y,z), SM64SurfaceType.Default, (short)0);
+                new Vec3f(-10, -0.5f, -10),
+                new Vec3f(-10, -0.5f, 10),
+                new Vec3f(10, -0.5f, 10),
+                new Vec3f(10, -0.5f, -10),
+                new Vec3f(x,y,z), SM64SurfaceType.Default, (short)0);
     }
 
     /**
@@ -75,7 +75,7 @@ public class SM64EnvManager {
             Collections.addAll(surfaces,generateSafetyFloor(selfMChar.state.position[0] / LibSM64.SCALE_FACTOR, -80, selfMChar.state.position[2] / LibSM64.SCALE_FACTOR));
         else
         {
-            var playerPos = Minecraft.getInstance().player.position();
+            var playerPos = MinecraftClient.getInstance().player.getPos();
             Collections.addAll(surfaces,generateSafetyFloor((float)playerPos.x,-80,(float)playerPos.z));
         }
         if (RemoteMCharHandler.mChars!=null)
@@ -86,7 +86,7 @@ public class SM64EnvManager {
         {
             int surfCount = surfaceItems.length;
             for (int i = 0; i < surfCount; i++) {
-                Vec3[] blockVertices = surfaceItems[i].verts; // vertices of the block
+                Vec3d[] blockVertices = surfaceItems[i].verts; // vertices of the block
                 if (blockVertices.length==1)
                 {
                     if (surfaceItems[i].isCube())
@@ -97,11 +97,11 @@ public class SM64EnvManager {
                 else
                     for (int j = 0; j < blockVertices.length; j+=4)
                     {
-                        var one = new Vector3f(blockVertices[j]);
-                        var two = new Vector3f(blockVertices[j+1]);
-                        var three = new Vector3f(blockVertices[j+2]);
-                        var four = new Vector3f(blockVertices[j+3]);
-                        var quads = LibSM64SurfUtils.generateQuad(one,two, three, four,new Vector3f(0,0,0), surfaceItems[i].material, surfaceItems[i].terrain);
+                        var one = new Vec3f(blockVertices[j]);
+                        var two = new Vec3f(blockVertices[j+1]);
+                        var three = new Vec3f(blockVertices[j+2]);
+                        var four = new Vec3f(blockVertices[j+3]);
+                        var quads = LibSM64SurfUtils.generateQuad(one,two, three, four,new Vec3f(0,0,0), surfaceItems[i].material, surfaceItems[i].terrain);
                         Collections.addAll(surfaces, quads);
                     }
             }
@@ -109,14 +109,14 @@ public class SM64EnvManager {
         LibSM64.StaticSurfacesLoad(surfaces.toArray(new SM64Surface[0]));
     }
 
-    public static void updateControls(Vec3 cam_fwd,Vec3 camPos,float joystickMult, boolean act_pressed,boolean jump_pressed, boolean crouch_pressed,
+    public static void updateControls(Vec3d cam_fwd,Vec3d camPos,float joystickMult, boolean act_pressed,boolean jump_pressed, boolean crouch_pressed,
                                       boolean W_pressed, boolean A_pressed, boolean S_pressed, boolean D_pressed){
         selfMChar.inputs.buttonB= (byte) (act_pressed?1:0);
         selfMChar.inputs.buttonA= (byte) (jump_pressed?1:0);
         selfMChar.inputs.buttonZ= (byte) (crouch_pressed?1:0);
         selfMChar.inputs.stickX=0;
         selfMChar.inputs.stickY=0;
-        Vec2 v2=null;
+        Vec2f v2=null;
         if (Retro64.hasControllerSupport && (clientControllerEvents.input.x>0 || clientControllerEvents.input.y>0)){
             v2 = clientControllerEvents.input;
         }else{
@@ -124,14 +124,14 @@ public class SM64EnvManager {
             if (A_pressed) selfMChar.inputs.stickY -= 1;
             if (S_pressed) selfMChar.inputs.stickX -= 1;
             if (D_pressed) selfMChar.inputs.stickY += 1;
-            v2 = new Vec2(selfMChar.inputs.stickX, selfMChar.inputs.stickY).normalized();
+            v2 = new Vec2f(selfMChar.inputs.stickX, selfMChar.inputs.stickY).normalize();
         }
         selfMChar.inputs.stickX=v2.x*joystickMult;
         selfMChar.inputs.stickY=v2.y*joystickMult;
         selfMChar.inputs.camLookX= (float) cam_fwd.x;
         selfMChar.inputs.camLookZ= (float) cam_fwd.z;
 
-        camPos= new Vec3(selfMChar.state.position[0],selfMChar.state.position[1],selfMChar.state.position[2]);//PUFixer.convertToSM64(camPos);
+        camPos= new Vec3d(selfMChar.state.position[0],selfMChar.state.position[1],selfMChar.state.position[2]);//PUFixer.convertToSM64(camPos);
         // camera stuff
         selfMChar.inputs.cameraPosition[0] = (float) camPos.x;
         selfMChar.inputs.cameraPosition[1] = (float) camPos.y;
