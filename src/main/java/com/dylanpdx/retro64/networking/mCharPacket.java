@@ -1,9 +1,9 @@
 package com.dylanpdx.retro64.networking;
 
 import com.dylanpdx.retro64.sm64.libsm64.AnimInfo;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.math.Vec3d;
 
 import java.io.IOException;
 import java.util.function.BiConsumer;
@@ -15,18 +15,18 @@ import java.util.function.Function;
  */
 public class mCharPacket {
 
-    Vec3 pos;
+    Vec3d pos;
     AnimInfo animInfo;
     public short animXRot,animYRot,animZRot;
     public int action,model;
-    public Player player;
+    public PlayerEntity player;
 
-    public static final BiConsumer<mCharPacket, FriendlyByteBuf> encoder = new BiConsumer<mCharPacket, FriendlyByteBuf>(){
+    public static final BiConsumer<mCharPacket, PacketByteBuf> encoder = new BiConsumer<mCharPacket, PacketByteBuf>(){
         @Override
-        public void accept(mCharPacket mCharPacket, FriendlyByteBuf friendlyByteBuf) {
-            friendlyByteBuf.writeDouble(mCharPacket.pos.x());
-            friendlyByteBuf.writeDouble(mCharPacket.pos.y());
-            friendlyByteBuf.writeDouble(mCharPacket.pos.z());
+        public void accept(mCharPacket mCharPacket, PacketByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeDouble(mCharPacket.pos.getX());
+            friendlyByteBuf.writeDouble(mCharPacket.pos.getY());
+            friendlyByteBuf.writeDouble(mCharPacket.pos.getZ());
             try {
                 friendlyByteBuf.writeByteArray(mCharPacket.animInfo.serialize());
             } catch (IOException e) {
@@ -40,12 +40,12 @@ public class mCharPacket {
         }
     };
 
-    public static final Function<FriendlyByteBuf, mCharPacket> decoder = new Function<FriendlyByteBuf, mCharPacket>(){
+    public static final Function<PacketByteBuf, mCharPacket> decoder = new Function<PacketByteBuf, mCharPacket>(){
 
         @Override
-        public mCharPacket apply(FriendlyByteBuf friendlyByteBuf) {
+        public mCharPacket apply(PacketByteBuf friendlyByteBuf) {
             mCharPacket mp = new mCharPacket();
-            mp.pos = new Vec3(friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble());
+            mp.pos = new Vec3d(friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble());
             byte[] bytes = friendlyByteBuf.readByteArray();
             try {
                 mp.animInfo = AnimInfo.deserialize(bytes);
@@ -62,12 +62,12 @@ public class mCharPacket {
     };
 
     public mCharPacket() {
-        this.pos = new Vec3(0, 0, 0);
+        this.pos = new Vec3d(0, 0, 0);
         this.animInfo = null;
 
     }
 
-    public mCharPacket(Vec3 pos, AnimInfo animInfo,short animXRot,short animYRot,short animZRot,int action,int model,Player player) {
+    public mCharPacket(Vec3d pos, AnimInfo animInfo,short animXRot,short animYRot,short animZRot,int action,int model,PlayerEntity player) {
         this.pos = pos;
         this.animInfo = animInfo;
         this.animXRot = animXRot;
