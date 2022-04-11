@@ -1,27 +1,25 @@
 package com.dylanpdx.retro64;
 
 import com.dylanpdx.retro64.blocks.CastleStairsBlock;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.minecraft.block.Block;
+import net.minecraft.block.Material;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 public class RegistryHandler {
 
-    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Retro64.MOD_ID);
-    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Retro64.MOD_ID);
-
-
-    public static void init(){
-        BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
-        ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+    public static final Block EXAMPLE_BLOCK = new CastleStairsBlock(FabricBlockSettings.of(Material.STONE).strength(4.0f));
+    
+    public static void init() {
+        Registry.register(Registry.BLOCK, new Identifier(Retro64.MOD_ID, "castlestairs"), EXAMPLE_BLOCK);
+        Registry.register(Registry.ITEM, new Identifier(Retro64.MOD_ID, "castlestairs"), new BlockItem(EXAMPLE_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
     }
-
-    public static final RegistryObject<Block> CASTLE_STAIRS = BLOCKS.register("castlestairs", CastleStairsBlock::new);
-    public static final RegistryObject<Item> CASTLE_STAIRS_ITEM = ITEMS.register("castlestairs",()->new BlockItem(CASTLE_STAIRS.get(),new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+    
+    //CASTLE_STAIRS = ITEM.register("castlestairs", CastleStairsBlock::new);
 
 }
+
