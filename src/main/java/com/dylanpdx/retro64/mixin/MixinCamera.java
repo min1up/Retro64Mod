@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Camera.class)
 public class MixinCamera {
 
-    @Inject(at=@At("HEAD"), method="Lnet/minecraft/client/Camera;getMaxZoom(D)D", cancellable = true)
+    @Inject(at=@At("HEAD"), method="Lnet/minecraft/client/render/Camera;getMaxZoom(D)D", cancellable = true)
     private void getMaxZoom(double pStartingDistance, CallbackInfoReturnable<Double> callback){
         if (RemoteMCharHandler.getIsMChar(MinecraftClient.getInstance().player))
             callback.setReturnValue(pStartingDistance);
