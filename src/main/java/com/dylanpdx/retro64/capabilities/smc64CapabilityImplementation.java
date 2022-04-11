@@ -1,6 +1,6 @@
 package com.dylanpdx.retro64.capabilities;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 public class smc64CapabilityImplementation implements smc64CapabilityInterface {
 
@@ -19,14 +19,14 @@ public class smc64CapabilityImplementation implements smc64CapabilityInterface {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        final CompoundTag tag = new CompoundTag();
+    public NbtCompound serializeNBT() {
+        final NbtCompound tag = new CompoundTag();
         tag.putBoolean(NBT_KEY_ENABLED, this.isEnabled);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(NbtCompound nbt) {
         this.isEnabled = nbt.getBoolean(NBT_KEY_ENABLED);
     }
 }
