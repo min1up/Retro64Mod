@@ -1,8 +1,8 @@
 package com.dylanpdx.retro64.networking;
 
 import com.dylanpdx.retro64.sm64.libsm64.AnimInfo;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.math.Vec3d;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -18,35 +18,35 @@ public class modelPacket {
     public AnimInfo animInfo;
     public short animXRot,animYRot,animZRot;
     public int action,model;
-    public Vec3 pos;
+    public Vec3d pos;
     public UUID user;
 
-    public static final BiConsumer<modelPacket, FriendlyByteBuf> encoder = new BiConsumer<modelPacket, FriendlyByteBuf>() {
+    public static final BiConsumer<modelPacket, PacketByteBuf> encoder = new BiConsumer<modelPacket, PacketByteBuf>() {
         @Override
-        public void accept(modelPacket modelPacket, FriendlyByteBuf friendlyByteBuf) {
-            friendlyByteBuf.writeUUID(modelPacket.user);
+        public void accept(modelPacket modelPacket, PacketByteBuf friendlyBytebuf) {
+            friendlyBytebuf.writeUuid(modelPacket.user);
             try {
-                friendlyByteBuf.writeByteArray(modelPacket.animInfo.serialize());
+                friendlyBytebuf.writeByteArray(modelPacket.animInfo.serialize());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            friendlyByteBuf.writeShort(modelPacket.animXRot);
-            friendlyByteBuf.writeShort(modelPacket.animYRot);
-            friendlyByteBuf.writeShort(modelPacket.animZRot);
-            friendlyByteBuf.writeInt(modelPacket.action);
-            friendlyByteBuf.writeInt(modelPacket.model);
-            friendlyByteBuf.writeDouble(modelPacket.pos.x);
-            friendlyByteBuf.writeDouble(modelPacket.pos.y);
-            friendlyByteBuf.writeDouble(modelPacket.pos.z);
+            friendlyBytebuf.writeShort(modelPacket.animXRot);
+            friendlyBytebuf.writeShort(modelPacket.animYRot);
+            friendlyBytebuf.writeShort(modelPacket.animZRot);
+            friendlyBytebuf.writeInt(modelPacket.action);
+            friendlyBytebuf.writeInt(modelPacket.model);
+            friendlyBytebuf.writeDouble(modelPacket.pos.x);
+            friendlyBytebuf.writeDouble(modelPacket.pos.y);
+            friendlyBytebuf.writeDouble(modelPacket.pos.z);
         }
     };
 
 
-    public static Function<FriendlyByteBuf, modelPacket> decoder = new Function<FriendlyByteBuf, modelPacket>() {
+    public static Function<PacketByteBuf, modelPacket> decoder = new Function<PacketByteBuf, modelPacket>() {
         @Override
-        public modelPacket apply(FriendlyByteBuf friendlyByteBuf) {
+        public modelPacket apply(PacketByteBuf friendlyByteBuf) {
             modelPacket modelPacket = new modelPacket();
-            modelPacket.user = friendlyByteBuf.readUUID();
+            modelPacket.user = friendlyByteBuf.readUuid();
             try {
                 modelPacket.animInfo = AnimInfo.deserialize(friendlyByteBuf.readByteArray());
             }
@@ -58,7 +58,7 @@ public class modelPacket {
             modelPacket.animZRot = friendlyByteBuf.readShort();
             modelPacket.action = friendlyByteBuf.readInt();
             modelPacket.model = friendlyByteBuf.readInt();
-            modelPacket.pos = new Vec3(friendlyByteBuf.readDouble(),friendlyByteBuf.readDouble(),friendlyByteBuf.readDouble());
+            modelPacket.pos = new Vec3d(friendlyByteBuf.readDouble(),friendlyByteBuf.readDouble(),friendlyByteBuf.readDouble());
 
             return modelPacket;
         }
@@ -68,7 +68,7 @@ public class modelPacket {
         animInfo=null;
     }
 
-    public modelPacket(AnimInfo animInfo,short animXRot,short animYRot,short animZRot,int action,int model,Vec3 pos, UUID user){
+    public modelPacket(AnimInfo animInfo,short animXRot,short animYRot,short animZRot,int action,int model,Vec3d pos, UUID user){
         this.user = user;
         this.animInfo = animInfo;
         this.animXRot = animXRot;
