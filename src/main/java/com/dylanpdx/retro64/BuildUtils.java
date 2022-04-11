@@ -1,7 +1,7 @@
 package com.dylanpdx.retro64;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.TitleScreen;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
@@ -9,14 +9,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class BuildUtils {
-
+    
     private static String sourceRepoURL = "https://github.com/Retro64Mod/libsm64-retro64.git";
     private static String sourceRepo="libsm64-retro64";
     private static String baseArgs;
     private static String repoDir;
     private static String portPath;
     public static boolean buildComplete=false;
-
 
     public static void Compile(String MSYS2_dir) throws IOException {
         repoDir = Paths.get(MSYS2_dir,"home",System.getProperty("user.name"),"libsm64-retro64").toString();
@@ -50,7 +49,7 @@ public class BuildUtils {
             // copy it to mods/sm64.dll
             FileUtils.copyFile(Paths.get(portPath,"sm64.dll").toFile(),Paths.get("mods","sm64.dll").toFile());
             buildComplete=true;
-            Minecraft.getInstance().setScreen(new TitleScreen());
+            MinecraftClient.getInstance().setScreen(new TitleScreen());
         }
 
     }
