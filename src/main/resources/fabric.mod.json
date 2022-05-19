@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "retro64",
+  "version": "${version}",
+
+  "name": "Retro64",
+  "description": "This mod lets you relive your favorite 1996 platformer game in a modern Minecraft world.",
+  "authors": [
+    "dylanpdx",
+    "min1up"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+
+  "license": "All rights reserved",
+  "icon": "assets/retro64/icon.png",
+  "credits": "n64decomp (sm64 decomp project), libsm64 project, original retro64 project",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.dylanpdx.retro64.Retro64"
+    ]
+  },
+  "mixins": [
+    "retro64.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "fabric": "*",
+    "minecraft": "1.18.x",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
